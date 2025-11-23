@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDG WebAssembly Demo - Interactive Mesh Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .control-panel {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #2a2a4e;
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            color: #e94560;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #533483;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #e94560;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: #e94560;
+        }
+        
+        .btn-primary:hover {
+            background: #d13f57;
+        }
+        
+        label {
+            display: block;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .range-value {
+            text-align: right;
+            color: #e94560;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .stats-box {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #a0a0a0;
+        }
+        
+        .stat-value {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        
+        .canvas-container {
+            background: #16213e;
+            border-radius: 12px;
+            border: 1px solid #2a2a4e;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 600px;
+            background: #0f3460;
+            border-radius: 8px;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            background: #0f3460;
+            border-radius: 8px;
+            border-left: 4px solid #4ade80;
+        }
+        
+        .status.loading {
+            border-left-color: #fbbf24;
+        }
+        
+        .status.error {
+            border-left-color: #ef4444;
+        }
+        
+        .log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            color: #a0a0a0;
+        }
+        
+        .log-entry.success {
+            color: #4ade80;
+        }
+        
+        .log-entry.error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 DDG WebAssembly Demo</h1>
+        <p class="subtitle">Interactive mesh processing powered by C++ algorithms compiled to WebAssembly</p>
+        <p class="subtitle" style="color: #e94560;">Added by Graph Technologies, 2025</p>
+        
+        <div class="demo-grid">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>Load Mesh</h3>
+                    <select id="meshSelect">
+                        <option value="tetrahedron">Tetrahedron</option>
+                        <option value="cube">Cube</option>
+                        <option value="octahedron">Octahedron</option>
+                        <option value="icosahedron">Icosahedron</option>
+                    </select>
+                    <button class="btn btn-primary" id="loadMesh">Load Mesh</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Mesh Operations</h3>
+                    <button class="btn" id="centerBtn" disabled>Center Mesh</button>
+                    <button class="btn" id="normalizeBtn" disabled>Normalize Mesh</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Mean Curvature Flow</h3>
+                    <label>Timestep:</label>
+                    <input type="range" id="timestep" min="0.0001" max="0.01" step="0.0001" value="0.001">
+                    <div class="range-value" id="timestepValue">0.001</div>
+                    
+                    <button class="btn" id="smoothOnce" disabled>Smooth (1 step)</button>
+                    <button class="btn" id="smooth10" disabled>Smooth (10 steps)</button>
+                    <button class="btn" id="smooth50" disabled>Smooth (50 steps)</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Analysis</h3>
+                    <button class="btn" id="computeCurvature" disabled>Compute Curvature</button>
+                    <button class="btn" id="computeGeodesic" disabled>Geodesic from v0</button>
+                    <button class="btn" id="conformalMap" disabled>Conformal Map</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Mesh Statistics</h3>
+                    <div class="stats-box" id="statsBox">
+                        <div class="stat-row">
+                            <span class="stat-label">Vertices:</span>
+                            <span class="stat-value" id="statV">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Edges:</span>
+                            <span class="stat-value" id="statE">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Faces:</span>
+                            <span class="stat-value" id="statF">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">χ (Euler):</span>
+                            <span class="stat-value" id="statChi">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Total K:</span>
+                            <span class="stat-value" id="statK">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">GB Error:</span>
+                            <span class="stat-value" id="statGB">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Canvas Area -->
+            <div class="canvas-container">
+                <canvas id="canvas"></canvas>
+                <div class="status" id="status">
+                    Loading WebAssembly module...
+                </div>
+                <div class="log" id="log"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="wasm/ddg.js"></script>
+    <script>
+        let wasmModule, currentMesh;
+        const log = [];
+        
+        // Initialize WASM
+        DDGModule().then(module => {
+            wasmModule = module;
+            addLog('✅ WebAssembly module loaded successfully', 'success');
+            setStatus('Ready! Select a mesh to begin.', false);
+            document.getElementById('loadMesh').disabled = false;
+        }).catch(err => {
+            addLog('❌ Failed to load WASM: ' + err.message, 'error');
+            setStatus('Failed to load WebAssembly module', true);
+        });
+        
+        // Mesh templates
+        const meshTemplates = {
+            tetrahedron: {
+                positions: [0,0,0, 1,0,0, 0,1,0, 0,0,1],
+                faces: [0,1,2, 0,1,3, 0,2,3, 1,2,3]
+            },
+            cube: {
+                positions: [-1,-1,-1, 1,-1,-1, 1,1,-1, -1,1,-1, -1,-1,1, 1,-1,1, 1,1,1, -1,1,1],
+                faces: [0,1,2, 0,2,3, 4,7,6, 4,6,5, 0,4,5, 0,5,1, 2,6,7, 2,7,3, 0,3,7, 0,7,4, 1,5,6, 1,6,2]
+            },
+            octahedron: {
+                positions: [1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1],
+                faces: [0,2,4, 2,1,4, 1,3,4, 3,0,4, 0,2,5, 2,1,5, 1,3,5, 3,0,5]
+            },
+            icosahedron: {
+                positions: [
+                    0,1,1.618, 0,1,-1.618, 0,-1,1.618, 0,-1,-1.618,
+                    1,1.618,0, 1,-1.618,0, -1,1.618,0, -1,-1.618,0,
+                    1.618,0,1, 1.618,0,-1, -1.618,0,1, -1.618,0,-1
+                ],
+                faces: [
+                    0,4,8, 0,8,2, 0,2,10, 0,10,6, 0,6,4,
+                    1,9,4, 1,3,9, 1,11,3, 1,6,11, 1,4,6,
+                    2,8,5, 2,5,7, 2,7,10, 5,8,9, 7,5,3,
+                    10,7,11, 11,7,3, 9,3,5, 4,9,8, 6,10,11
+                ]
+            }
+        };
+        
+        // Event listeners
+        document.getElementById('loadMesh').onclick = loadSelectedMesh;
+        document.getElementById('centerBtn').onclick = () => applyOperation('center', () => currentMesh.center());
+        document.getElementById('normalizeBtn').onclick = () => applyOperation('normalize', () => currentMesh.normalize());
+        document.getElementById('smoothOnce').onclick = () => smoothMesh(1);
+        document.getElementById('smooth10').onclick = () => smoothMesh(10);
+        document.getElementById('smooth50').onclick = () => smoothMesh(50);
+        document.getElementById('computeCurvature').onclick = computeCurvature;
+        document.getElementById('computeGeodesic').onclick = computeGeodesic;
+        document.getElementById('conformalMap').onclick = computeConformal;
+        
+        document.getElementById('timestep').oninput = (e) => {
+            document.getElementById('timestepValue').textContent = e.target.value;
+        };
+        
+        function loadSelectedMesh() {
+            const selected = document.getElementById('meshSelect').value;
+            const template = meshTemplates[selected];
+            
+            currentMesh = new wasmModule.Mesh();
+            currentMesh.buildFromArrays(
+                new Float32Array(template.positions),
+                new Int32Array(template.faces)
+            );
+            
+            currentMesh.normalize();
+            
+            addLog(`Loaded ${selected} mesh`, 'success');
+            updateStats();
+            enableControls();
+            renderMesh();
+        }
+        
+        function applyOperation(name, operation) {
+            const start = performance.now();
+            operation();
+            const elapsed = (performance.now() - start).toFixed(2);
+            
+            addLog(`${name} completed in ${elapsed}ms`, 'success');
+            updateStats();
+            renderMesh();
+        }
+        
+        function smoothMesh(steps) {
+            const timestep = parseFloat(document.getElementById('timestep').value);
+            const start = performance.now();
+            
+            if (steps === 1) {
+                currentMesh.meanCurvatureFlowStep(timestep);
+            } else {
+                currentMesh.meanCurvatureFlow(timestep, steps);
+            }
+            
+            const elapsed = (performance.now() - start).toFixed(2);
+            addLog(`Smoothing (${steps} steps, t=${timestep}) completed in ${elapsed}ms`, 'success');
+            updateStats();
+            renderMesh();
+        }
+        
+        function computeCurvature() {
+            const start = performance.now();
+            const K = currentMesh.computeGaussianCurvature();
+            const totalK = currentMesh.totalGaussianCurvature();
+            const error = currentMesh.gaussBonnetError();
+            const elapsed = (performance.now() - start).toFixed(2);
+            
+            addLog(`Curvature computed in ${elapsed}ms`, 'success');
+            addLog(`  Total K = ${totalK.toFixed(6)}`, '');
+            addLog(`  Gauss-Bonnet error = ${error.toFixed(6)}`, error < 0.01 ? 'success' : 'error');
+            
+            updateStats();
+        }
+        
+        function computeGeodesic() {
+            const start = performance.now();
+            const dist = currentMesh.computeGeodesicDistance(0);
+            const elapsed = (performance.now() - start).toFixed(2);
+            
+            const maxDist = Math.max(...dist);
+            addLog(`Geodesic distance computed in ${elapsed}ms`, 'success');
+            addLog(`  Max distance from v0: ${maxDist.toFixed(4)}`, '');
+        }
+        
+        function computeConformal() {
+            const start = performance.now();
+            const uv = currentMesh.spectralConformalParameterization();
+            const elapsed = (performance.now() - start).toFixed(2);
+            
+            const energy = currentMesh.dirichletEnergy(uv);
+            addLog(`Conformal parameterization in ${elapsed}ms`, 'success');
+            addLog(`  Dirichlet energy: ${energy.toFixed(6)}`, '');
+        }
+        
+        function updateStats() {
+            if (!currentMesh) return;
+            
+            document.getElementById('statV').textContent = currentMesh.numVertices();
+            document.getElementById('statE').textContent = currentMesh.numEdges();
+            document.getElementById('statF').textContent = currentMesh.numFaces();
+            document.getElementById('statChi').textContent = currentMesh.eulerCharacteristic();
+            
+            try {
+                const totalK = currentMesh.totalGaussianCurvature();
+                const error = currentMesh.gaussBonnetError();
+                document.getElementById('statK').textContent = totalK.toFixed(4);
+                document.getElementById('statGB').textContent = error.toFixed(6);
+            } catch (e) {
+                // Not yet computed
+            }
+        }
+        
+        function enableControls() {
+            document.getElementById('centerBtn').disabled = false;
+            document.getElementById('normalizeBtn').disabled = false;
+            document.getElementById('smoothOnce').disabled = false;
+            document.getElementById('smooth10').disabled = false;
+            document.getElementById('smooth50').disabled = false;
+            document.getElementById('computeCurvature').disabled = false;
+            document.getElementById('computeGeodesic').disabled = false;
+            document.getElementById('conformalMap').disabled = false;
+        }
+        
+        function renderMesh() {
+            // Simple wireframe visualization
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#0f3460';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!currentMesh) return;
+            
+            const positions = currentMesh.getPositions();
+            
+            // Simple projection (orthographic)
+            ctx.strokeStyle = '#e94560';
+            ctx.lineWidth = 1;
+            
+            const scale = 200;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+            
+            // Draw vertices
+            ctx.fillStyle = '#4ade80';
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i] * scale + offsetX;
+                const y = positions[i+1] * scale + offsetY;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            setStatus(`Mesh rendered: ${currentMesh.numVertices()} vertices`, false);
+        }
+        
+        function setStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status' + (isError ? ' error' : '');
+        }
+        
+        function addLog(message, type = '') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry' + (type ? ' ' + type : '');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
