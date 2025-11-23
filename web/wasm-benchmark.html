@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDG WASM Performance Benchmarks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 40px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+        
+        .benchmark-controls {
+            background: #16213e;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #2a2a4e;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: #e94560;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #d13f57;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .results-table {
+            width: 100%;
+            background: #16213e;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2a4e;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a4e;
+        }
+        
+        th {
+            background: #0f3460;
+            color: #e94560;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #0f3460;
+        }
+        
+        .time {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        
+        .status {
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .status.loading {
+            background: rgba(251, 191, 36, 0.1);
+            border-left-color: #fbbf24;
+            color: #fbbf24;
+        }
+        
+        .status.complete {
+            background: rgba(74, 222, 128, 0.1);
+            border-left-color: #4ade80;
+            color: #4ade80;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #0f3460;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #533483);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ DDG WebAssembly Benchmarks</h1>
+        <p class="subtitle">Performance testing of discrete differential geometry algorithms</p>
+        <p class="subtitle" style="color: #e94560;">Added by Graph Technologies, 2025</p>
+        
+        <div id="status" class="status loading">
+            Loading WebAssembly module...
+        </div>
+        
+        <div class="benchmark-controls">
+            <button class="btn" id="runAll" disabled>Run All Benchmarks</button>
+            <button class="btn" id="runCurvature" disabled>Curvature Only</button>
+            <button class="btn" id="runSmoothing" disabled>Smoothing Only</button>
+            <button class="btn" id="runGeodesic" disabled>Geodesic Only</button>
+            <button class="btn" id="runConformal" disabled>Conformal Only</button>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="results-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Mesh</th>
+                        <th>Vertices</th>
+                        <th>Time (ms)</th>
+                        <th>Operations/sec</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #a0a0a0;">
+                            Run benchmarks to see results
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="wasm/ddg.js"></script>
+    <script>
+        let wasmModule;
+        const results = [];
+        
+        // Initialize
+        DDGModule().then(module => {
+            wasmModule = module;
+            setStatus('Ready! Click "Run All Benchmarks" to begin.', 'complete');
+            enableControls();
+        }).catch(err => {
+            setStatus('Failed to load WASM module: ' + err.message, 'error');
+        });
+        
+        // Event listeners
+        document.getElementById('runAll').onclick = runAllBenchmarks;
+        document.getElementById('runCurvature').onclick = () => runBenchmark('curvature');
+        document.getElementById('runSmoothing').onclick = () => runBenchmark('smoothing');
+        document.getElementById('runGeodesic').onclick = () => runBenchmark('geodesic');
+        document.getElementById('runConformal').onclick = () => runBenchmark('conformal');
+        
+        function enableControls() {
+            document.querySelectorAll('.btn').forEach(btn => btn.disabled = false);
+        }
+        
+        function setStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+        
+        function setProgress(percent) {
+            document.getElementById('progress').style.width = percent + '%';
+        }
+        
+        async function runAllBenchmarks() {
+            results.length = 0;
+            document.getElementById('resultsBody').innerHTML = '';
+            setProgress(0);
+            
+            const benchmarks = ['curvature', 'smoothing', 'geodesic', 'conformal'];
+            
+            for (let i = 0; i < benchmarks.length; i++) {
+                await runBenchmark(benchmarks[i]);
+                setProgress((i + 1) / benchmarks.length * 100);
+            }
+            
+            setStatus(`Completed ${results.length} benchmarks`, 'complete');
+        }
+        
+        async function runBenchmark(type) {
+            setStatus(`Running ${type} benchmark...`, 'loading');
+            
+            // Test configurations
+            const configs = [
+                { name: 'Tetrahedron', v: 4, positions: [0,0,0, 1,0,0, 0,1,0, 0,0,1], faces: [0,1,2, 0,1,3, 0,2,3, 1,2,3] },
+                { name: 'Cube', v: 8, positions: [-1,-1,-1, 1,-1,-1, 1,1,-1, -1,1,-1, -1,-1,1, 1,-1,1, 1,1,1, -1,1,1],
+                  faces: [0,1,2, 0,2,3, 4,7,6, 4,6,5, 0,4,5, 0,5,1, 2,6,7, 2,7,3, 0,3,7, 0,7,4, 1,5,6, 1,6,2] }
+            ];
+            
+            for (const config of configs) {
+                const mesh = new wasmModule.Mesh();
+                mesh.buildFromArrays(
+                    new Float32Array(config.positions),
+                    new Int32Array(config.faces)
+                );
+                
+                let time, ops;
+                let status = '✅';
+                
+                try {
+                    switch(type) {
+                        case 'curvature':
+                            time = benchmark(() => mesh.computeGaussianCurvature(), 100);
+                            ops = (1000 / time * 100).toFixed(0);
+                            break;
+                        
+                        case 'smoothing':
+                            time = benchmark(() => mesh.meanCurvatureFlowStep(0.001), 10);
+                            ops = (1000 / time * 10).toFixed(0);
+                            break;
+                        
+                        case 'geodesic':
+                            time = benchmark(() => mesh.computeGeodesicDistance(0), 10);
+                            ops = (1000 / time * 10).toFixed(0);
+                            break;
+                        
+                        case 'conformal':
+                            time = benchmark(() => mesh.spectralConformalParameterization(), 5);
+                            ops = (1000 / time * 5).toFixed(0);
+                            break;
+                    }
+                } catch (e) {
+                    status = '❌';
+                    time = 0;
+                    ops = 0;
+                }
+                
+                addResult({
+                    algorithm: type.charAt(0).toUpperCase() + type.slice(1),
+                    mesh: config.name,
+                    vertices: config.v,
+                    time: time.toFixed(2),
+                    ops: ops,
+                    status: status
+                });
+                
+                // Small delay for UI update
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            setStatus('Benchmark complete', 'complete');
+        }
+        
+        function benchmark(fn, iterations) {
+            const start = performance.now();
+            for (let i = 0; i < iterations; i++) {
+                fn();
+            }
+            const elapsed = performance.now() - start;
+            return elapsed / iterations;
+        }
+        
+        function addResult(result) {
+            results.push(result);
+            
+            const tbody = document.getElementById('resultsBody');
+            if (results.length === 1) {
+                tbody.innerHTML = '';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${result.algorithm}</strong></td>
+                <td>${result.mesh}</td>
+                <td>${result.vertices}</td>
+                <td class="time">${result.time}</td>
+                <td>${result.ops}</td>
+                <td>${result.status}</td>
+            `;
+            tbody.appendChild(row);
+        }
+    </script>
+</body>
+</html>

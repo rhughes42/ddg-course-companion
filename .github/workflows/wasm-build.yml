@@ -1,0 +1,114 @@
+# WebAssembly Build and Test Workflow
+# Added by Graph Technologies, 2025
+
+name: WebAssembly Build & Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/wasm/**'
+      - 'src/cpp/core/**'
+      - 'src/cpp/algorithms/**'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Emscripten
+      uses: mymindstorm/setup-emsdk@v12
+      with:
+        version: 3.1.45
+    
+    - name: Install Eigen3
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libeigen3-dev
+    
+    - name: Verify Emscripten
+      run: |
+        emcc --version
+        echo "Emscripten installed successfully"
+    
+    - name: Configure CMake
+      run: |
+        cd src/wasm
+        mkdir -p build
+        cd build
+        emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Build WASM
+      run: |
+        cd src/wasm/build
+        emmake make -j4
+    
+    - name: Install outputs
+      run: |
+        cd src/wasm/build
+        make install
+    
+    - name: Verify outputs
+      run: |
+        ls -lh web/wasm/
+        test -f web/wasm/ddg.js || exit 1
+        test -f web/wasm/ddg.wasm || exit 1
+        echo "✅ WASM files generated successfully"
+    
+    - name: Check file sizes
+      run: |
+        echo "File sizes:"
+        du -h web/wasm/ddg.js
+        du -h web/wasm/ddg.wasm
+        
+        # Warn if files are too large
+        js_size=$(stat -c%s web/wasm/ddg.js)
+        wasm_size=$(stat -c%s web/wasm/ddg.wasm)
+        
+        if [ $js_size -gt 100000 ]; then
+          echo "⚠️ Warning: ddg.js is larger than 100KB"
+        fi
+        
+        if [ $wasm_size -gt 1000000 ]; then
+          echo "⚠️ Warning: ddg.wasm is larger than 1MB"
+        fi
+    
+    - name: Setup Node.js for testing
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Run WASM tests
+      run: |
+        cd src/wasm
+        node tests/run-node-tests.js
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wasm-build
+        path: |
+          web/wasm/ddg.js
+          web/wasm/ddg.wasm
+        retention-days: 30
+    
+    - name: Build summary
+      run: |
+        echo "## WebAssembly Build Summary 🌐" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Output Files" >> $GITHUB_STEP_SUMMARY
+        echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+        echo "| ddg.js | $(du -h web/wasm/ddg.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+        echo "| ddg.wasm | $(du -h web/wasm/ddg.wasm | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Performance" >> $GITHUB_STEP_SUMMARY
+        echo "- Compiled with -O3 optimization" >> $GITHUB_STEP_SUMMARY
+        echo "- All 6 DDG algorithms available" >> $GITHUB_STEP_SUMMARY
+        echo "- Emscripten $(emcc --version | head -n1)" >> $GITHUB_STEP_SUMMARY
