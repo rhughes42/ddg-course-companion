@@ -1,0 +1,40 @@
+# C# Build and Test Workflow
+# Added by Graph Technologies, 2025
+
+name: C# Build & Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-csharp:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
+    
+    - name: Restore dependencies
+      run: |
+        cd src/csharp
+        dotnet restore
+    
+    - name: Build
+      run: |
+        cd src/csharp
+        dotnet build --configuration Release --no-restore
+    
+    - name: Run Tests
+      run: |
+        cd src/csharp
+        dotnet test --configuration Release --no-build --verbosity normal

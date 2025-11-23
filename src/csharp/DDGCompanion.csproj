@@ -1,11 +1,32 @@
+<!-- DDGCompanion.csproj -->
+<!-- C# Project Configuration -->
+<!-- Added by Graph Technologies, 2025 -->
+
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>DDGCompanion</AssemblyName>
+    <RootNamespace>DDGCompanion</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>Graph Technologies</Authors>
+    <Company>Graph Technologies</Company>
+    <Product>DDG Course Companion</Product>
+    <Description>Discrete Differential Geometry implementation in C#</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="MathNet.Numerics.MKL.Win-x64" Version="3.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Core\*.cs" />
+    <Compile Include="Algorithms\*.cs" />
+    <Compile Include="Examples\*.cs" />
+    <Compile Include="Utils\*.cs" />
+    <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>
