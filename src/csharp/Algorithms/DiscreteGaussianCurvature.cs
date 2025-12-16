@@ -4,6 +4,7 @@
 // Description: Angle defect computation for vertex curvature
 
 using System;
+using System.Linq;
 using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using DDGCompanion.Core;

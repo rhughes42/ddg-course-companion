@@ -4,6 +4,7 @@
 // Description: Validate mesh topology and geometry
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DDGCompanion.Core;
 
