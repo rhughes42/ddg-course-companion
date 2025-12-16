@@ -220,6 +220,7 @@ var dist = HeatMethod.Compute(mesh, 0, 5, 10);
 
 **Files:**
 - C++: `src/cpp/algorithms/HodgeDecomposition.{h,cpp}`
+- C#: `src/csharp/Algorithms/HodgeDecomposition.cs`
 
 **Theory:**
 Decompose 1-form into orthogonal components:
@@ -241,6 +242,7 @@ where:
 
 **Usage:**
 ```cpp
+// C++
 Eigen::VectorXd omega = // input 1-form
 VectorFieldComponents comp = HodgeDecomposition::decompose(mesh, omega);
 
@@ -248,6 +250,18 @@ VectorFieldComponents comp = HodgeDecomposition::decompose(mesh, omega);
 Eigen::VectorXd exact = comp.exact;
 Eigen::VectorXd coexact = comp.coexact;
 Eigen::VectorXd harmonic = comp.harmonic;
+```
+
+```csharp
+// C#
+var omega = Vector<double>.Build.Dense(mesh.Edges.Count);
+// ... initialize omega ...
+var components = HodgeDecomposition.Decompose(mesh, omega);
+
+// Access components
+var exact = components.Exact;
+var coexact = components.Coexact;
+var harmonic = components.Harmonic;
 ```
 
 **Applications:**

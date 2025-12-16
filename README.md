@@ -74,6 +74,7 @@ dotnet run -- smoothing
 dotnet run -- curvature
 dotnet run -- geodesic
 dotnet run -- conformal
+dotnet run -- vectorfield
 ```
 
 **Run tests:**
@@ -156,7 +157,7 @@ ddg-course-companion/
 | **Gaussian Curvature** | ✅ | ✅ | ✅ | ✅ | Complete |
 | **Conformal Parameterization** | ✅ | ✅ | ✅ | ✅ | Complete |
 | **Heat Method (Geodesics)** | ✅ | ✅ | ✅ | ✅ | Complete |
-| **Hodge Decomposition** | ✅ | 🔴 | 🔴 | ✅ | C++ only |
+| **Hodge Decomposition** | ✅ | ✅ | ✅ | ✅ | Complete |
 
 **Legend:** ✅ Complete | 🔴 Not implemented
 
@@ -453,6 +454,7 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Python implementation
 - Performance optimizations
 - Documentation improvements
+- GPU acceleration
 
 ---
 
@@ -481,6 +483,7 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Equivalent test suite
 - Cross-platform compatibility
 - Integration tests
+- Hodge decomposition tests
 
 ### Continuous Integration
 
@@ -539,8 +542,8 @@ Free for academic and commercial use with attribution.
 
 ## 🚀 Roadmap
 
-### Version 1.1 (Planned)
-- [ ] Complete C# Hodge decomposition
+### Version 1.1 (Completed)
+- [x] Complete C# Hodge decomposition
 - [ ] GPU acceleration (CUDA/OpenCL)
 - [ ] Python bindings
 - [ ] Rhino/Grasshopper plugin

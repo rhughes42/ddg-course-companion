@@ -15,9 +15,14 @@ A comprehensive implementation and learning resource for Keenan Crane's Discrete
 - ✅ Mesh utilities (centering, normalization)
 
 **C# (src/csharp/)**
-- ✅ Core data structures (Vertex, Edge, Face, HalfEdge)
+- ✅ Core data structures (Vertex, Edge, Face, HalfEdge, Mesh)
 - ✅ Cotan Laplacian (MathNet.Numerics)
-- ✅ .NET 6+ compatible
+- ✅ Mean Curvature Flow
+- ✅ Discrete Gaussian Curvature
+- ✅ Conformal Parameterization
+- ✅ Heat Method (Geodesic Distance)
+- ✅ Hodge Decomposition
+- ✅ .NET 8+ compatible
 
 ### 2. Documentation
 
@@ -70,9 +75,11 @@ A comprehensive implementation and learning resource for Keenan Crane's Discrete
 - Mean curvature flow
 
 **C# Examples**
-- Build mesh from data
-- Compute Laplacian
-- Solve linear systems
+- Laplacian smoothing via mean curvature flow
+- Discrete Gaussian curvature computation
+- Geodesic distance via heat method
+- Conformal surface parameterization
+- Vector field Hodge decomposition
 
 ## Quick Start Guide
 
@@ -105,7 +112,7 @@ https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/b6ef5e32
 - **Core Files**: 30+
 - **Documentation Pages**: 15+
 - **Code Examples**: 20+
-- **Algorithms Implemented**: 5+
+- **Algorithms Implemented**: 6 (all major DDG algorithms)
 
 ## Key Features
 
@@ -143,8 +150,8 @@ https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/b6ef5e32
 | 4. Exterior Calc | Forms, DEC | Partial | ✅ | A1 |
 | 5. Curvature | Discrete curvature | ✅ | ✅ | A2 |
 | 6. Laplacian | Cotan, MCF | ✅ | ✅ | A3 |
-| 7. Parametrization | Conformal maps | Planned | ✅ | A4 |
-| 8. Vector Fields | Hodge decomp | Planned | ✅ | A5-A6 |
+| 7. Parametrization | Conformal maps | ✅ | ✅ | A4 |
+| 8. Vector Fields | Hodge decomp | ✅ | ✅ | A5-A6 |
 
 ## File Structure
 
@@ -342,6 +349,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Last Updated**: November 23, 2025
-**Version**: 1.0.0
-**Status**: Active Development
+**Last Updated**: December 16, 2025
+**Version**: 1.1.0
+**Status**: Production Ready
