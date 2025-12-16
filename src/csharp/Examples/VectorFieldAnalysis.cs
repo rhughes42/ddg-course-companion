@@ -59,7 +59,7 @@ namespace DDGCompanion.Examples
             Console.WriteLine("Orthogonality Check:");
             Console.WriteLine($"  <exact, coexact>:   {Math.Abs(exactCoexactDot):E6}");
             Console.WriteLine($"  <exact, harmonic>:  {Math.Abs(exactHarmonicDot):E6}");
-            Console.WriteLine($"  <coexact, harmonic>:{Math.Abs(coexactHarmonicDot):E6}\n");
+            Console.WriteLine($"  <coexact, harmonic>: {Math.Abs(coexactHarmonicDot):E6}\n");
             
             // Display component percentages
             double totalNorm = omega.L2Norm();
