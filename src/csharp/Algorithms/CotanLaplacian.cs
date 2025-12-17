@@ -31,6 +31,36 @@ namespace DDGCompanion.Algorithms
             return builder;
         }
         
+        public static SparseMatrix BuildMassMatrix(Mesh mesh)
+        {
+            int n = mesh.Vertices.Count;
+            var builder = new SparseMatrix(n, n);
+            
+            // Barycentric dual area for each vertex
+            foreach (var vertex in mesh.Vertices)
+            {
+                double area = 0.0;
+                
+                if (vertex.HalfEdge != null)
+                {
+                    var he = vertex.HalfEdge;
+                    do
+                    {
+                        if (he.Face != null)
+                        {
+                            // Add 1/3 of the triangle area
+                            area += he.Face.Area() / 3.0;
+                        }
+                        he = he.Twin?.Next;
+                    } while (he != null && he != vertex.HalfEdge);
+                }
+                
+                builder[vertex.Index, vertex.Index] = area;
+            }
+            
+            return builder;
+        }
+        
         private static double ComputeCotanWeight(HalfEdge he)
         {
             // Simplified cotan weight computation

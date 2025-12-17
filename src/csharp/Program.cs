@@ -45,6 +45,12 @@ namespace DDGCompanion
                     ConformalMapping.Run();
                     break;
                     
+                case "vectorfield":
+                case "hodge":
+                case "5":
+                    VectorFieldAnalysis.Run();
+                    break;
+                    
                 default:
                     Console.WriteLine($"Unknown example: {args[0]}");
                     ShowMenu();
@@ -56,15 +62,17 @@ namespace DDGCompanion
         {
             Console.WriteLine("Available Examples:");
             Console.WriteLine("==================\n");
-            Console.WriteLine("  1. smoothing  - Mesh smoothing via mean curvature flow");
-            Console.WriteLine("  2. curvature  - Discrete Gaussian curvature computation");
-            Console.WriteLine("  3. geodesic   - Geodesic distance via heat method");
-            Console.WriteLine("  4. conformal  - Conformal surface parameterization\n");
+            Console.WriteLine("  1. smoothing    - Mesh smoothing via mean curvature flow");
+            Console.WriteLine("  2. curvature    - Discrete Gaussian curvature computation");
+            Console.WriteLine("  3. geodesic     - Geodesic distance via heat method");
+            Console.WriteLine("  4. conformal    - Conformal surface parameterization");
+            Console.WriteLine("  5. vectorfield  - Vector field Hodge decomposition\n");
             Console.WriteLine("Usage:");
             Console.WriteLine("  dotnet run [example_name]\n");
             Console.WriteLine("Examples:");
             Console.WriteLine("  dotnet run smoothing");
             Console.WriteLine("  dotnet run curvature");
+            Console.WriteLine("  dotnet run vectorfield");
         }
     }
 }

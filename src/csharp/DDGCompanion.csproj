@@ -5,7 +5,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <AssemblyName>DDGCompanion</AssemblyName>
@@ -15,18 +15,18 @@
     <Company>Graph Technologies</Company>
     <Product>DDG Course Companion</Product>
     <Description>Discrete Differential Geometry implementation in C#</Description>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="Tests\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="MathNet.Numerics.MKL.Win-x64" Version="3.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Core\*.cs" />
-    <Compile Include="Algorithms\*.cs" />
-    <Compile Include="Examples\*.cs" />
-    <Compile Include="Utils\*.cs" />
-    <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>
