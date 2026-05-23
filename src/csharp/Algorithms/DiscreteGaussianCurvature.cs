@@ -28,22 +28,31 @@ namespace DDGCompanion.Algorithms
                 
                 double angleSum = 0.0;
                 var he = v.HalfEdge;
+                if (he == null) continue;
+                var visited = new System.Collections.Generic.HashSet<int>();
                 
-                do
+                while (he != null && visited.Add(he.Index))
                 {
-                    if (he!.Face != null)
+                    if (he.Face != null && he.Vertex != null && he.Next?.Vertex != null)
                     {
                         // Compute angle at this vertex in the face
-                        var e1 = Vector3.Normalize(he.Twin!.Vertex!.Position - v.Position);
-                        var e2 = Vector3.Normalize(he.Next!.Vertex!.Position - v.Position);
+                        var d1 = he.Vertex.Position - v.Position;
+                        var d2 = he.Next.Vertex.Position - v.Position;
+                        if (d1.LengthSquared() > 1e-12f && d2.LengthSquared() > 1e-12f)
+                        {
+                            var e1 = Vector3.Normalize(d1);
+                            var e2 = Vector3.Normalize(d2);
                         
-                        float dotProduct = Vector3.Dot(e1, e2);
-                        dotProduct = Math.Clamp(dotProduct, -1.0f, 1.0f);
-                        double angle = Math.Acos(dotProduct);
-                        angleSum += angle;
+                            float dotProduct = Vector3.Dot(e1, e2);
+                            dotProduct = Math.Clamp(dotProduct, -1.0f, 1.0f);
+                            double angle = Math.Acos(dotProduct);
+                            angleSum += angle;
+                        }
                     }
-                    he = he!.Twin!.Next;
-                } while (he != v.HalfEdge);
+                    if (he.Twin?.Next == null) break;
+                    he = he.Twin.Next;
+                    if (he == v.HalfEdge) break;
+                }
                 
                 // Angle defect formula
                 K[i] = 2.0 * Math.PI - angleSum;

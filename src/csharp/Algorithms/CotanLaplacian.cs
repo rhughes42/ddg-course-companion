@@ -18,14 +18,28 @@ namespace DDGCompanion.Algorithms
                 int i = v.Index;
                 double sumWeights = 0;
                 var he = v.HalfEdge;
-                do
+                if (he == null)
                 {
-                    int j = he!.Next!.Vertex!.Index;
+                    continue;
+                }
+
+                var visited = new HashSet<int>();
+                while (he != null && visited.Add(he.Index))
+                {
+                    if (he.Vertex == null)
+                    {
+                        break;
+                    }
+
+                    int j = he.Vertex.Index;
                     double weight = ComputeCotanWeight(he);
-                    builder[i, j] = weight;
+                    builder[i, j] += weight;
                     sumWeights += weight;
-                    he = he.Twin!.Next;
-                } while (he != v.HalfEdge);
+
+                    if (he.Twin?.Next == null) break;
+                    he = he.Twin.Next;
+                    if (he == v.HalfEdge) break;
+                }
                 builder[i, i] = -sumWeights;
             }
             return builder;
@@ -63,8 +77,9 @@ namespace DDGCompanion.Algorithms
         
         private static double ComputeCotanWeight(HalfEdge he)
         {
-            // Simplified cotan weight computation
-            return 0.5; // Placeholder
+            if (he.Edge == null) return 0.0;
+            var cotan = he.Edge.Cotan();
+            return double.IsFinite(cotan) ? cotan : 0.0;
         }
     }
 }

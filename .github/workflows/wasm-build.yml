@@ -1,6 +1,3 @@
-# WebAssembly Build and Test Workflow
-# Added by Graph Technologies, 2025
-
 name: WebAssembly Build & Test
 
 on:
@@ -18,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup Emscripten
       uses: mymindstorm/setup-emsdk@v12
@@ -78,7 +75,7 @@ jobs:
         fi
     
     - name: Setup Node.js for testing
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
     
@@ -88,7 +85,7 @@ jobs:
         node tests/run-node-tests.js
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: wasm-build
         path: |

@@ -1,22 +1,21 @@
 # Assignment Guides
 
-Detailed guides for all DDG programming assignments.
+Guides for assignments currently documented in this repository.
 
-## Mandatory Assignments
-
-- [A0: Combinatorial Surfaces](A0-combinatorial-surfaces.md)
-- [A1: Discrete Exterior Calculus](A1-exterior-calculus.md)
-
-## Optional Assignments (Pick 3)
+## Available in this repository
 
 - [A2: Curvature](A2-curvature.md)
 - [A3: The Laplacian](A3-laplacian.md)
-- [A4: Conformal Parameterization](A4-parameterization.md)
-- [A5: Geodesic Distance](A5-geodesic.md)
+- [A4: Conformal Parameterization](A4-conformal-parameterization.md)
+- [A5: Geodesic Distance](A5-geodesic-distance.md)
 
 ## Extra Credit
 
-- [A6: Vector Field Decomposition](A6-vector-fields.md)
+- [A6: Vector Fields](A6-vector-fields.md)
+
+## Planned but currently missing
+
+- A1 (Discrete Exterior Calculus) guide file is not yet present in this repository.
 
 ## Implementation Tips
 

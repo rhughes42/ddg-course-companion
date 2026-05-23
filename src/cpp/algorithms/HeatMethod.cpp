@@ -136,45 +136,4 @@ Eigen::VectorXd HeatMethod::solveDistance(const Mesh& mesh,
     
     return phi;
 }
-
-Eigen::SparseMatrix<double> HodgeDecomposition::buildHodgeStar0(const Mesh& mesh) {
-    return CotanLaplacian::buildMassMatrix(mesh);
-}
-
-Eigen::SparseMatrix<double> HodgeDecomposition::buildHodgeStar1(const Mesh& mesh) {
-    Eigen::SparseMatrix<double> star1(mesh.numEdges(), mesh.numEdges());
-    std::vector<Eigen::Triplet<double>> triplets;
-    
-    for (const auto& e : mesh.edges) {
-        // Ratio of dual edge length to primal edge length
-        double weight = 1.0; // Simplified
-        triplets.push_back(Eigen::Triplet<double>(e->index, e->index, weight));
-    }
-    
-    star1.setFromTriplets(triplets.begin(), triplets.end());
-    return star1;
-}
-
-Eigen::SparseMatrix<double> HodgeDecomposition::buildHodgeStar2(const Mesh& mesh) {
-    Eigen::SparseMatrix<double> star2(mesh.numFaces(), mesh.numFaces());
-    std::vector<Eigen::Triplet<double>> triplets;
-    
-    for (const auto& f : mesh.faces) {
-        double area = f->area();
-        triplets.push_back(Eigen::Triplet<double>(f->index, f->index, 1.0 / area));
-    }
-    
-    star2.setFromTriplets(triplets.begin(), triplets.end());
-    return star2;
-}
-
-Eigen::MatrixXd HodgeDecomposition::harmonicBases(const Mesh& mesh) {
-    int genus = (2 - mesh.eulerCharacteristic()) / 2;
-    return Eigen::MatrixXd::Zero(mesh.numEdges(), 2 * genus);
-}
-
-std::vector<std::vector<int>> HodgeDecomposition::treeCoTree(const Mesh& mesh) {
-    return std::vector<std::vector<int>>();
-}
-
 } // namespace ddg

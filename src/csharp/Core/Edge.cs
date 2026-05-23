@@ -33,9 +33,16 @@ namespace DDGCompanion.Core
             {
                 var e1 = HalfEdge.Vertex!.Position - HalfEdge.Twin!.Vertex!.Position;
                 var e2 = HalfEdge.Next!.Vertex!.Position - HalfEdge.Vertex.Position;
-                float cosAngle = Vector3.Dot(e1, e2) / (e1.Length() * e2.Length());
-                float sinAngle = Vector3.Cross(e1, e2).Length() / (e1.Length() * e2.Length());
-                cotSum += cosAngle / sinAngle;
+                float denom = e1.Length() * e2.Length();
+                if (denom > 1e-12f)
+                {
+                    float cosAngle = Vector3.Dot(e1, e2) / denom;
+                    float sinAngle = Vector3.Cross(e1, e2).Length() / denom;
+                    if (Math.Abs(sinAngle) > 1e-12f)
+                    {
+                        cotSum += cosAngle / sinAngle;
+                    }
+                }
             }
             
             // Cotan from second triangle
@@ -44,9 +51,16 @@ namespace DDGCompanion.Core
                 var twinHe = HalfEdge.Twin;
                 var e1 = twinHe.Vertex!.Position - twinHe.Twin!.Vertex!.Position;
                 var e2 = twinHe.Next!.Vertex!.Position - twinHe.Vertex.Position;
-                float cosAngle = Vector3.Dot(e1, e2) / (e1.Length() * e2.Length());
-                float sinAngle = Vector3.Cross(e1, e2).Length() / (e1.Length() * e2.Length());
-                cotSum += cosAngle / sinAngle;
+                float denom = e1.Length() * e2.Length();
+                if (denom > 1e-12f)
+                {
+                    float cosAngle = Vector3.Dot(e1, e2) / denom;
+                    float sinAngle = Vector3.Cross(e1, e2).Length() / denom;
+                    if (Math.Abs(sinAngle) > 1e-12f)
+                    {
+                        cotSum += cosAngle / sinAngle;
+                    }
+                }
             }
             
             return cotSum / 2.0;

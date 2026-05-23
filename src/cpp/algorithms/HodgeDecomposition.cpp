@@ -3,6 +3,7 @@
 // Added by Graph Technologies, 2025
 
 #include "HodgeDecomposition.h"
+#include "CotanLaplacian.h"
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 

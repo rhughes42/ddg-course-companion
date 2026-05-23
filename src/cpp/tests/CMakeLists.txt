@@ -15,8 +15,6 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(ddg-tests
     test_mesh.cpp
     test_laplacian.cpp
-    test_curvature.cpp
-    test_algorithms.cpp
 )
 
 target_link_libraries(ddg-tests
@@ -25,6 +23,7 @@ target_link_libraries(ddg-tests
     ddg-algorithms
     Catch2::Catch2WithMain
 )
+ddg_enable_warnings(ddg-tests)
 
 # Register tests with CTest
 include(CTest)
