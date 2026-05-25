@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Eigen/Core>
+
 class Vertex;
 class Edge;
 class Face;

@@ -4,14 +4,17 @@
 # Laplacian smoothing example
 add_executable(laplacian-smoothing laplacian_smoothing.cpp)
 target_link_libraries(laplacian-smoothing PRIVATE ddg-core ddg-algorithms)
+ddg_enable_warnings(laplacian-smoothing)
 
 # Curvature analysis example
 add_executable(curvature-analysis curvature_analysis.cpp)
 target_link_libraries(curvature-analysis PRIVATE ddg-core ddg-algorithms)
+ddg_enable_warnings(curvature-analysis)
 
 # Geodesic distance example
 add_executable(geodesic-distance geodesic_distance.cpp)
 target_link_libraries(geodesic-distance PRIVATE ddg-core ddg-algorithms)
+ddg_enable_warnings(geodesic-distance)
 
 # Install examples
 install(TARGETS laplacian-smoothing curvature-analysis geodesic-distance

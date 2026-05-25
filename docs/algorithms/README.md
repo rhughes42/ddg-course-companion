@@ -2,6 +2,9 @@
 
 Comprehensive guide to all implemented DDG algorithms.
 
+> Maturity note: several implementations are currently **Partial** or **Experimental**.  
+> See `docs/status/IMPLEMENTATION_AUDIT.md` for current correctness and robustness caveats.
+
 **Added by Graph Technologies, 2025**
 
 ---

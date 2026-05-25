@@ -19,6 +19,11 @@ namespace DDGCompanion.Core
         
         public void Build(Vector3[] positions, int[,] faceIndices)
         {
+            if (positions == null) throw new ArgumentNullException(nameof(positions));
+            if (faceIndices == null) throw new ArgumentNullException(nameof(faceIndices));
+            if (faceIndices.GetLength(1) != 3)
+                throw new ArgumentException("Mesh.Build currently supports triangle faces only.", nameof(faceIndices));
+
             Vertices.Clear();
             Edges.Clear();
             Faces.Clear();
@@ -30,8 +35,9 @@ namespace DDGCompanion.Core
                 Vertices.Add(new Vertex(positions[i]) { Index = i });
             }
             
-            // Track halfedges by edge key
+            // Track halfedges by directed edge key and preserve endpoints.
             var halfedgeMap = new Dictionary<(int, int), HalfEdge>();
+            var halfedgeEndpoints = new List<(int Source, int Target)>();
             
             // Create faces and halfedges
             for (int i = 0; i < faceIndices.GetLength(0); i++)
@@ -43,6 +49,15 @@ namespace DDGCompanion.Core
                 {
                     int v0 = faceIndices[i, j];
                     int v1 = faceIndices[i, (j + 1) % 3];
+
+                    if (v0 < 0 || v0 >= Vertices.Count || v1 < 0 || v1 >= Vertices.Count)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(faceIndices), $"Face {i} contains invalid vertex index.");
+                    }
+                    if (v0 == v1)
+                    {
+                        throw new ArgumentException($"Face {i} contains a degenerate edge ({v0} -> {v1}).", nameof(faceIndices));
+                    }
                     
                     var he = new HalfEdge
                     {
@@ -53,6 +68,7 @@ namespace DDGCompanion.Core
                     
                     faceHalfEdges.Add(he);
                     halfedgeMap[(v0, v1)] = he;
+                    halfedgeEndpoints.Add((v0, v1));
                     HalfEdges.Add(he);
                 }
                 
@@ -66,36 +82,48 @@ namespace DDGCompanion.Core
                 Faces.Add(face);
             }
             
-            // Set twin pointers and create edges
+            // Set twin pointers where reverse directed edge exists.
             foreach (var (key, he) in halfedgeMap)
             {
                 var (v0, v1) = key;
                 var twinKey = (v1, v0);
-                
-                if (halfedgeMap.ContainsKey(twinKey))
+
+                if (halfedgeMap.TryGetValue(twinKey, out var twin))
                 {
-                    he.Twin = halfedgeMap[twinKey];
-                    
-                    if (he.Edge == null)
-                    {
-                        var edge = new Edge
-                        {
-                            HalfEdge = he,
-                            Index = Edges.Count
-                        };
-                        he.Edge = edge;
-                        he.Twin.Edge = edge;
-                        Edges.Add(edge);
-                    }
+                    he.Twin = twin;
                 }
             }
-            
-            // Set vertex halfedges
-            foreach (var he in HalfEdges)
+
+            // Create undirected edges independent of winding consistency.
+            var edgeMap = new Dictionary<(int, int), Edge>();
+            for (int i = 0; i < HalfEdges.Count; i++)
             {
-                if (he.Vertex!.HalfEdge == null)
+                var he = HalfEdges[i];
+                var (source, target) = halfedgeEndpoints[i];
+                var key = source < target ? (source, target) : (target, source);
+
+                if (!edgeMap.TryGetValue(key, out var edge))
                 {
-                    he.Vertex.HalfEdge = he;
+                    edge = new Edge
+                    {
+                        HalfEdge = he,
+                        Index = Edges.Count
+                    };
+                    edgeMap[key] = edge;
+                    Edges.Add(edge);
+                }
+
+                he.Edge = edge;
+            }
+            
+            // Set vertex halfedges (outgoing representative per vertex).
+            for (int i = 0; i < HalfEdges.Count; i++)
+            {
+                var he = HalfEdges[i];
+                var (source, _) = halfedgeEndpoints[i];
+                if (Vertices[source].HalfEdge == null)
+                {
+                    Vertices[source].HalfEdge = he;
                 }
             }
         }

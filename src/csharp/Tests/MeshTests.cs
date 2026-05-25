@@ -23,9 +23,9 @@ namespace DDGCompanion.Tests
             
             var faces = new int[,]
             {
-                { 0, 1, 2 },
+                { 0, 2, 1 },
                 { 0, 1, 3 },
-                { 0, 2, 3 },
+                { 0, 3, 2 },
                 { 1, 2, 3 }
             };
             
@@ -106,6 +106,25 @@ namespace DDGCompanion.Tests
                 maxDist = Math.Max(maxDist, v.Position.Length());
             
             Assert.True(Math.Abs(maxDist - 1.0f) < 1e-6f);
+        }
+
+        [Fact]
+        public void TestBuildRejectsInvalidFaceIndex()
+        {
+            var positions = new Vector3[]
+            {
+                new(0, 0, 0),
+                new(1, 0, 0),
+                new(0, 1, 0)
+            };
+
+            var faces = new int[,]
+            {
+                { 0, 1, 3 }
+            };
+
+            var mesh = new Mesh();
+            Assert.Throws<ArgumentOutOfRangeException>(() => mesh.Build(positions, faces));
         }
     }
 }

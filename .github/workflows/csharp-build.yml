@@ -1,6 +1,3 @@
-# C# Build and Test Workflow
-# Added by Graph Technologies, 2025
-
 name: C# Build & Test
 
 on:
@@ -17,12 +14,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
     
     - name: Restore dependencies
       run: |
@@ -36,5 +33,5 @@ jobs:
     
     - name: Run Tests
       run: |
-        cd src/csharp
-        dotnet test --configuration Release --no-build --verbosity normal
+        cd src/csharp/Tests
+        dotnet test --configuration Release --verbosity normal

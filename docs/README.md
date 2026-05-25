@@ -1,25 +1,20 @@
-# Documentation
+# Documentation Index
 
-Comprehensive documentation for the Discrete Differential Geometry course companion.
+## Core
+- [Algorithm Reference](algorithms/README.md)
+- [Formula Reference](formulas/index.md)
+- [Assignments](assignments/README.md)
 
-## Structure
+## Chapters (currently available)
+- [01 Introduction](chapters/01-introduction.md)
+- [02 Combinatorial Surfaces](chapters/02-combinatorial-surfaces.md)
+- [05 Curvature](chapters/05-curvature.md)
 
-- **chapters/** - Detailed summaries of each course chapter
-- **formulas/** - Complete formula reference with LaTeX
-- **assignments/** - Assignment guides and solutions
-- **notes/** - Additional learning notes and resources
+> Additional chapter summaries are planned but not yet present in this repository.
 
-## Quick Links
+## Tutorials
+- [Tutorial Guide](tutorials/README.md)
 
-- [Chapter 1: Introduction](chapters/01-introduction.md)
-- [Chapter 2: Combinatorial Surfaces](chapters/02-combinatorial-surfaces.md)
-- [Chapter 3: Differential Geometry](chapters/03-differential-geometry.md)
-- [Chapter 4: Exterior Calculus](chapters/04-exterior-calculus.md)
-- [Chapter 5: Curvature](chapters/05-curvature.md)
-- [Chapter 6: The Laplacian](chapters/06-laplacian.md)
-- [Chapter 7: Surface Parameterization](chapters/07-parameterization.md)
-- [Chapter 8: Vector Fields](chapters/08-vector-fields.md)
-
-## Formula Reference
-
-See [formulas/index.md](formulas/index.md) for complete formula appendix.
+## Status / Release Planning
+- [Implementation Audit](status/IMPLEMENTATION_AUDIT.md)
+- [Next Release Plan](status/NEXT_RELEASE_PLAN.md)

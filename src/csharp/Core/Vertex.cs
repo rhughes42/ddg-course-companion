@@ -21,11 +21,18 @@ namespace DDGCompanion.Core
             if (HalfEdge == null) return neighbors;
             
             var he = HalfEdge;
-            do
+            var visited = new HashSet<int>();
+            while (he != null && visited.Add(he.Index))
             {
-                neighbors.Add(he.Next!.Vertex!);
-                he = he.Twin!.Next!;
-            } while (he != HalfEdge);
+                if (he.Vertex != null)
+                {
+                    neighbors.Add(he.Vertex);
+                }
+
+                if (he.Twin?.Next == null) break;
+                he = he.Twin.Next;
+                if (he == HalfEdge) break;
+            }
             
             return neighbors;
         }
@@ -35,11 +42,15 @@ namespace DDGCompanion.Core
             if (HalfEdge == null) return 0;
             int count = 0;
             var he = HalfEdge;
-            do
+            var visited = new HashSet<int>();
+            while (he != null && visited.Add(he.Index))
             {
                 count++;
-                he = he.Twin!.Next!;
-            } while (he != HalfEdge);
+
+                if (he.Twin?.Next == null) break;
+                he = he.Twin.Next;
+                if (he == HalfEdge) break;
+            }
             return count;
         }
         
@@ -47,11 +58,13 @@ namespace DDGCompanion.Core
         {
             if (HalfEdge == null) return true;
             var he = HalfEdge;
-            do
+            var visited = new HashSet<int>();
+            while (he != null && visited.Add(he.Index))
             {
-                if (he.Face == null) return true;
-                he = he.Twin!.Next!;
-            } while (he != HalfEdge);
+                if (he.Face == null || he.Twin == null || he.Twin.Face == null || he.Twin.Next == null) return true;
+                he = he.Twin.Next;
+                if (he == HalfEdge) break;
+            }
             return false;
         }
     }

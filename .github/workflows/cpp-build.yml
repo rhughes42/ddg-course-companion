@@ -1,6 +1,3 @@
-# C++ Build and Test Workflow
-# Added by Graph Technologies, 2025
-
 name: C++ Build & Test
 
 on:
@@ -18,7 +15,7 @@ jobs:
         build_type: [Release, Debug]
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Eigen3 (Ubuntu)
       if: runner.os == 'Linux'
@@ -31,7 +28,7 @@ jobs:
     - name: Configure CMake
       run: |
         cd src/cpp
-        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
     
     - name: Build
       run: |
@@ -41,4 +38,4 @@ jobs:
     - name: Run Tests
       run: |
         cd src/cpp/build
-        ctest -C ${{ matrix.build_type }} --output-on-failure
+        ctest --output-on-failure
